@@ -9,26 +9,16 @@ fn media_meta() -> Vec<(String, String)> {
             std::time::Duration::from_millis(5000),
         );
 
-        proxy
-            .method_call("org.freedesktop.DBus", "ListNames", ())
-            .unwrap()
+        proxy.method_call("org.freedesktop.DBus", "ListNames", ()).unwrap()
     };
 
-    let players = names
-        .iter()
-        .filter(|x| x.contains("org.mpris.MediaPlayer2"));
+    let players = names.iter().filter(|x| x.contains("org.mpris.MediaPlayer2"));
 
     players
         .map(|x| {
-            let proxy = conn.with_proxy(
-                x,
-                "/org/mpris/MediaPlayer2",
-                std::time::Duration::from_millis(5000),
-            );
+            let proxy = conn.with_proxy(x, "/org/mpris/MediaPlayer2", std::time::Duration::from_millis(5000));
 
-            let meta: dbus::arg::PropMap = proxy
-                .get("org.mpris.MediaPlayer2.Player", "Metadata")
-                .unwrap();
+            let meta: dbus::arg::PropMap = proxy.get("org.mpris.MediaPlayer2.Player", "Metadata").unwrap();
 
             match (meta.get("xesam:title"), meta.get("xesam:artist")) {
                 (Some(title), Some(artists)) => (
@@ -94,10 +84,7 @@ fn media_title() -> Vec<String> {
 #[allow(dead_code)]
 fn main_loop() {
     let conn = dbus::blocking::Connection::new_session().unwrap();
-    let expr = dbus::message::MatchRule::new_signal(
-        "org.freedesktop.DBus.Properties",
-        "PropertiesChanged",
-    );
+    let expr = dbus::message::MatchRule::new_signal("org.freedesktop.DBus.Properties", "PropertiesChanged");
 
     use dbus::blocking::stdintf::org_freedesktop_dbus::PropertiesPropertiesChanged;
 
@@ -108,8 +95,7 @@ fn main_loop() {
     .unwrap();
 
     loop {
-        conn.process(std::time::Duration::from_millis(5000))
-            .unwrap();
+        conn.process(std::time::Duration::from_millis(5000)).unwrap();
     }
 }
 
